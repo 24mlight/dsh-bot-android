@@ -16,6 +16,6 @@
     "@capacitor/cli": "^8.5.3"
   },
   "author": "24mlight",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "type": "module"
 }

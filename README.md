@@ -9,7 +9,7 @@
   <a href="https://github.com/24mlight/dsh-bot-android/actions/workflows/android.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/24mlight/dsh-bot-android/android.yml?branch=main&label=build"></a>
   <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white">
   <img alt="Capacitor 8" src="https://img.shields.io/badge/Capacitor-8-119EFF?logo=capacitor&logoColor=white">
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/24mlight/dsh-bot-android?color=blue"></a>
+  <a href="LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/github/license/24mlight/dsh-bot-android?color=blue"></a>
 </p>
 
 <p align="center"><b>English</b> · <a href="README.zh-CN.md">简体中文</a></p>
@@ -162,4 +162,4 @@ Their install commands are under [Server plugins](#server-plugins) above.
 
 ## License
 
-[MIT](LICENSE)
+[GNU GPL v3](LICENSE). You may use, study, change and share this app. If you distribute it or a modified version, you must release the complete source under the same license.

@@ -9,7 +9,7 @@
   <a href="https://github.com/24mlight/dsh-bot-android/actions/workflows/android.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/24mlight/dsh-bot-android/android.yml?branch=main&label=build"></a>
   <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white">
   <img alt="Capacitor 8" src="https://img.shields.io/badge/Capacitor-8-119EFF?logo=capacitor&logoColor=white">
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/24mlight/dsh-bot-android?color=blue"></a>
+  <a href="LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/github/license/24mlight/dsh-bot-android?color=blue"></a>
 </p>
 
 <p align="center"><a href="README.md">English</a> · <b>简体中文</b></p>
@@ -182,4 +182,4 @@ docs/icon/              App 图标源文件（Orbit：圆环里跳出一个点�
 
 ## 许可证
 
-[MIT](LICENSE)
+[GNU GPL v3](LICENSE)。你可以自由使用、研究、修改和分享这个 App；如果你分发它或修改后的版本，必须同样以 GPL v3 公开全部源代码。
