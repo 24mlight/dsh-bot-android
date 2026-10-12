@@ -1,6 +1,6 @@
 {
   "name": "dsh-bot-android",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "private": true,
   "description": "DSH Bot Android shell — a private Capacitor WebView client for the self-hosted DeepSeek Harness + DS Bot deployment.",
   "main": "index.js",

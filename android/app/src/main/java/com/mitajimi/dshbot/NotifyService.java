@@ -38,7 +38,8 @@ import org.json.JSONObject;
  * too). START_STICKY and {@link BootReceiver} bring it back after the
  * system stops it or the phone restarts. It logs in with the same
  * session cookie the app's WebView got when the user tapped 登录, read from
- * the WebView cookie store, so it never sees the token. Notices show whether
+ * the WebView cookie store, so it never sees the token (a server without a
+ * login token gets no cookie and needs none). Notices show whether
  * or not the app is on screen.
  *
  * With the screen off the phone's CPU sleeps, and plain timers (Thread.sleep,
@@ -190,13 +191,13 @@ public class NotifyService extends Service {
     /** One long poll; returns how long to pause before the next one. */
     private long pollOnce() throws IOException, JSONException {
         String base = NotifyPrefs.baseUrl(this);
-        String cookie = base == null ? null : CookieManager.getInstance().getCookie(base);
-        // Not logged in yet (or logged out): wait quietly; only a server that
-        // refuses the login counts as lost.
-        if (base == null || cookie == null || cookie.isEmpty()) {
+        // Not logged in yet: wait quietly.
+        if (base == null) {
             NotifyPrefs.setLastPoll(this, "no-login");
             return IDLE_MS;
         }
+        // A server without a login token sets no cookie and needs none.
+        String cookie = cookieFor(base);
         String boot = NotifyPrefs.boot(this);
         long since = NotifyPrefs.since(this);
         JSONObject body = new JSONObject().put("waitMs", WAIT_MS);
@@ -218,6 +219,12 @@ public class NotifyService extends Service {
             }
             switch (PollPlan.outcomeOf(status)) {
                 case LOGIN_LOST:
+                    // No cookie yet on a server that wants one: still waiting for
+                    // the login, not a lost one.
+                    if (cookie == null) {
+                        NotifyPrefs.setLastPoll(this, "no-login");
+                        return IDLE_MS;
+                    }
                     NotifyPrefs.setLastPoll(this, "login-lost");
                     loginLost();
                     return IDLE_MS;
@@ -248,7 +255,13 @@ public class NotifyService extends Service {
         }
     }
 
-    /** A POST to the server's dsh-notify route with the WebView's login cookie. */
+    /** The WebView's cookies for the server, or null when it has none. */
+    static String cookieFor(String base) {
+        String cookie = CookieManager.getInstance().getCookie(base);
+        return cookie == null || cookie.isEmpty() ? null : cookie;
+    }
+
+    /** A POST to the server's dsh-notify route with the WebView's login cookie, if any. */
     static HttpURLConnection post(String base, String cookie, JSONObject body, int readTimeoutMs) throws IOException {
         HttpURLConnection http = (HttpURLConnection) new URL(base + PATH).openConnection();
         http.setRequestMethod("POST");
@@ -261,7 +274,7 @@ public class NotifyService extends Service {
         http.setFixedLengthStreamingMode(payload.length);
         http.setRequestProperty("content-type", "application/json");
         http.setRequestProperty("accept", "application/json");
-        http.setRequestProperty("cookie", cookie);
+        if (cookie != null) http.setRequestProperty("cookie", cookie);
         http.setRequestProperty("origin", base);
         http.setRequestProperty("referer", base + "/");
         try (OutputStream out = http.getOutputStream()) {
@@ -277,15 +290,15 @@ public class NotifyService extends Service {
      */
     static String sendTest(Context context) {
         String base = NotifyPrefs.baseUrl(context);
-        String cookie = base == null ? null : CookieManager.getInstance().getCookie(base);
-        if (base == null || cookie == null || cookie.isEmpty()) return "no-login";
+        if (base == null) return "no-login";
+        String cookie = cookieFor(base);
         HttpURLConnection http = null;
         try {
             http = post(base, cookie, new JSONObject().put("test", true), 15_000);
             int status = http.getResponseCode();
             switch (PollPlan.outcomeOf(status)) {
                 case LOGIN_LOST:
-                    return "login-lost";
+                    return cookie == null ? "no-login" : "login-lost";
                 case NOT_INSTALLED:
                     return "not-installed";
                 case RETRY:
@@ -311,12 +324,13 @@ public class NotifyService extends Service {
     static JSONObject serverDiagnostics(Context context) {
         JSONObject result = new JSONObject();
         String base = NotifyPrefs.baseUrl(context);
-        String cookie = base == null ? null : CookieManager.getInstance().getCookie(base);
         HttpURLConnection http = null;
         try {
-            if (base == null || cookie == null || cookie.isEmpty()) return result.put("error", "no-login");
+            if (base == null) return result.put("error", "no-login");
+            String cookie = cookieFor(base);
             http = post(base, cookie, new JSONObject().put("debug", true), 15_000);
             int status = http.getResponseCode();
+            if (cookie == null && PollPlan.outcomeOf(status) == PollPlan.Outcome.LOGIN_LOST) return result.put("error", "no-login");
             if (status != 200) return result.put("error", "http-" + status);
             JSONObject answer = new JSONObject(read(http.getInputStream()));
             JSONObject value = answer.optJSONObject("value");

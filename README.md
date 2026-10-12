@@ -56,6 +56,18 @@ The recommended setup is your own domain behind a **Cloudflare Tunnel**. You get
 
 Your address is now `https://dsh.example.com`. Open it in a phone browser on mobile data to check that it loads.
 
+### Recommended: require a login token
+
+Once the address is public, anyone who finds it can open your DSH, and DSH can run commands on that machine. So make DSH web require a login token, so that only a link with `?token=…` gets in. The app works either way, but a token is strongly recommended.
+
+If you are not sure how to set it up for your DSH version and deployment, ask a coding agent (Claude Code, Codex, Cursor…) on that machine to do it, for example:
+
+```text
+My DSH web (dsh --profile web) is reachable from the internet through a
+Cloudflare Tunnel. Configure it so that it requires a login token, keep it
+running as a service, and give me the login link with ?token=….
+```
+
 ## Server plugins
 
 Install both plugins into your DSH web profile on the server. Both are **required**. Run these on the machine that runs `dsh web` (it needs `git`). Replace `web` with your profile's name.
@@ -92,10 +104,10 @@ Download the latest `dsh-bot-vX.Y.Z.apk` from [Releases](https://github.com/24ml
 
 ## Log in
 
-1. Start DSH web and copy its login link, the full address with `?token=…`.
-2. Open DSH Bot, paste the link into **服务地址** (server address) and tap **登录** (log in).
+1. Copy your DSH web address. With a login token (recommended), copy the full login link with `?token=…`.
+2. Open DSH Bot, paste it into **服务地址** (server address) and tap **登录** (log in).
 
-The address is saved on the phone only. After DSH restarts its token changes: press Back in the app to return to the setup page, paste the new link and log in again.
+The address is saved on the phone only. If your token changes (for example when DSH restarts), press Back in the app to return to the setup page, paste the new link and log in again.
 
 ## Notifications
 

@@ -63,6 +63,18 @@ App 里填的地址必须是运行 `dsh web` 那台机器的**公网地址**。�
 
 完成后你的地址就是 `https://dsh.example.com`。用手机流量在浏览器里打开一次，确认能访问。
 
+### 建议：开启登录 token
+
+地址放到公网后，任何知道它的人都能打开你的 DSH，而 DSH 可以在那台机器上执行命令。所以建议让 DSH web 必须带登录 token 才能访问，只有带 `?token=…` 的链接才能进。App 有没有 token 都能用，但强烈建议加上。
+
+不确定你的 DSH 版本和部署方式该怎么配，可以在那台机器上让 coding agent（Claude Code、Codex、Cursor 等）帮你配，比如这样说：
+
+```text
+我的 DSH web（dsh --profile web）通过 Cloudflare Tunnel 暴露在公网上。
+帮我把它配置成必须带登录 token 才能访问，保持作为系统服务运行，
+最后把带 ?token=… 的登录链接给我。
+```
+
 ## 服务器插件
 
 两个插件都是**必装**的，装在服务器上的 DSH web profile 里。在运行 `dsh web` 的机器上执行下面的命令（需要有 `git`），把 `web` 换成你自己的 profile 名：
@@ -99,10 +111,10 @@ systemctl restart dsh-web
 
 ## 登录
 
-1. 启动 DSH web，复制它的登录链接，也就是带 `?token=…` 的完整地址。
-2. 打开 DSH Bot，把链接粘贴到「服务地址」，点「登录」。
+1. 复制你的 DSH web 地址。开了登录 token 的（推荐），复制带 `?token=…` 的完整登录链接。
+2. 打开 DSH Bot，粘贴到「服务地址」，点「登录」。
 
-地址只保存在手机上。DSH 重启后 token 会变：在 App 里按返回键回到登录页，粘贴新链接重新登录就行。
+地址只保存在手机上。token 变了的话（比如 DSH 重启后），在 App 里按返回键回到登录页，粘贴新链接重新登录就行。
 
 ## 消息通知
 

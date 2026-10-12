@@ -211,7 +211,7 @@
 
     <label for="link">服务地址</label>
     <div class="field">
-      <input id="link" type="password" inputmode="url" placeholder="https://你的服务器/?token=…"
+      <input id="link" type="password" inputmode="url" placeholder="https://你的服务器"
              autocomplete="off" spellcheck="false" autocapitalize="off" />
       <button class="reveal" id="reveal" type="button" aria-pressed="false">显示</button>
     </div>
@@ -332,7 +332,7 @@
       $("go").addEventListener("click", function () {
         var url = parseUrl($("link").value);
         if (!url) {
-          showStatus("请填写完整的服务地址，例如 https://dsh.example.com/?token=…");
+          showStatus("请填写完整的服务地址，例如 https://dsh.example.com");
           return;
         }
         enter({ url: url });
