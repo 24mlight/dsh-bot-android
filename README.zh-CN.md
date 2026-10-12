@@ -20,7 +20,11 @@
 
 App 不绑定任何服务器：第一次填一次你的服务地址，之后就连那一台。
 
-![登录页，浅色和深色](docs/screenshots/setup-390.png)
+<p align="center">
+  <img src="docs/screenshots/chat-dark.jpg" width="300" alt="深色模式下的对话">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/chat-light.jpg" width="300" alt="浅色模式下的对话">
+</p>
 
 ## 需要准备
 
@@ -113,6 +117,8 @@ systemctl restart dsh-web
 
 1. 复制你的 DSH web 地址。开了登录 token 的（推荐），复制带 `?token=…` 的完整登录链接。
 2. 打开 DSH Bot，粘贴到「服务地址」，点「登录」。
+
+![登录页，浅色和深色](docs/screenshots/setup-390.png)
 
 地址只保存在手机上。token 变了的话（比如 DSH 重启后），在 App 里按返回键回到登录页，粘贴新链接重新登录就行。
 

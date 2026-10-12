@@ -18,7 +18,11 @@ An Android app for your own [DeepSeek Harness](https://www.npmjs.com/package/@de
 
 The app is not tied to any server: you paste your server's address once, and that server is the one it opens.
 
-![The setup page, light and dark](docs/screenshots/setup-390.png)
+<p align="center">
+  <img src="docs/screenshots/chat-dark.jpg" width="300" alt="A chat in dark mode">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/chat-light.jpg" width="300" alt="A chat in light mode">
+</p>
 
 ## What you need
 
@@ -106,6 +110,8 @@ Download the latest `dsh-bot-vX.Y.Z.apk` from [Releases](https://github.com/24ml
 
 1. Copy your DSH web address. With a login token (recommended), copy the full login link with `?token=…`.
 2. Open DSH Bot, paste it into **服务地址** (server address) and tap **登录** (log in).
+
+![The setup page, light and dark](docs/screenshots/setup-390.png)
 
 The address is saved on the phone only. If your token changes (for example when DSH restarts), press Back in the app to return to the setup page, paste the new link and log in again.
 
