@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 11 and below (API 29-30) backup rules; see data_extraction_rules.xml.
+  Keeps the WebView data directory (which holds the login token) out of backup.
+-->
+<full-backup-content>
+    <exclude domain="root" path="app_webview/" />
+</full-backup-content>

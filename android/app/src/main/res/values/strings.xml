@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DSH Bot</string>
+    <string name="title_activity_main">DSH Bot</string>
+    <string name="package_name">com.mitajimi.dshbot</string>
+    <string name="custom_url_scheme">com.mitajimi.dshbot</string>
+</resources>

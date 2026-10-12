@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ (API 31+) backup rules.
+  The login token lives in WebView localStorage under app_webview/, so the
+  WebView data directory is kept out of cloud backup and device-to-device
+  transfer. A restored or migrated install starts at the setup page.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="app_webview/" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="app_webview/" />
+    </device-transfer>
+</data-extraction-rules>

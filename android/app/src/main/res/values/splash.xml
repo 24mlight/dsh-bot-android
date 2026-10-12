@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launch screen colour, light mode: white. Dark mode (values-night) is
+     black. The setup page's intro (www/index.html) starts from the same
+     colours and draws the Orbit mark in on them. -->
+<resources>
+    <color name="splash_background">#FFFFFFFF</color>
+</resources>

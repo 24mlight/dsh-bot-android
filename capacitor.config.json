@@ -1,0 +1,12 @@
+{
+  "appId": "com.mitajimi.dshbot",
+  "appName": "DSH Bot",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "adjustMarginsForEdgeToEdge": "auto"
+  }
+}

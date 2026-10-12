@@ -1,0 +1,366 @@
+<!doctype html>
+<!--
+  DSH Bot — Android shell entry.
+
+  Responsibilities:
+    1. Collect one full address of the user's DSH web server, with or
+       without ?token=… (any http/https host: the app is not tied to one
+       server).
+    2. Remember it and prefill it on the next launch, but never enter
+       automatically: the user taps 登录, because the token rotates when
+       the server restarts and may need replacing first.
+    3. Hand the login URL to the native DshNav plugin, which opens it with
+       WebView.loadUrl(). A script navigation from this https://localhost
+       page would be cross-site, and dsh web's SameSite=Strict session
+       cookie would be dropped on its 303 (T10).
+
+  The back button still returns here from the remote app (loadUrl adds a
+  history entry). No token is ever logged or shown in page text.
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#eef1f7" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <title>DSH Bot</title>
+  <style>
+    :root {
+      --glass: rgba(255, 255, 255, 0.62);
+      --glass-border: rgba(255, 255, 255, 0.65);
+      --text: #1c2333;
+      --text-dim: #5a6478;
+      --accent: #3b6fe0;
+      --danger: #c2503d;
+      --field: rgba(255, 255, 255, 0.75);
+      --on-accent: #ffffff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --glass: rgba(22, 22, 26, 0.62);
+        --glass-border: rgba(255, 255, 255, 0.14);
+        --text: #e8ebf4;
+        --text-dim: #99a1b8;
+        --accent: #7ba4f0;
+        --danger: #e07b6a;
+        --field: rgba(12, 12, 15, 0.60);
+        --on-accent: #0c0f1a;
+      }
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font: 16px/1.6 -apple-system, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+      color: var(--text);
+      background: #eef1f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: calc(env(safe-area-inset-top, 0px) + 24px) 20px calc(env(safe-area-inset-bottom, 0px) + 24px);
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #000000;
+      }
+    }
+    /* Tall screens: the card sits low and the particle clouds above it. */
+    @media (min-height: 640px) {
+      body { align-items: flex-end; }
+    }
+    #neural {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0;
+    }
+    .card {
+      position: relative; z-index: 1;
+      width: min(26rem, 100%);
+      padding: 28px 24px;
+      border-radius: 22px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: 0 16px 48px rgba(31, 38, 135, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    h1 { margin: 0 0 4px; font-size: 1.45rem; letter-spacing: -0.01em; }
+    .sub { margin: 0 0 20px; color: var(--text-dim); font-size: 0.9rem; }
+    label { display: block; margin: 14px 0 6px; font-size: 0.82rem; color: var(--text-dim); }
+    input {
+      width: 100%; padding: 13px 14px; font-size: 1rem; color: var(--text);
+      background: var(--field); border: 1px solid var(--glass-border);
+      border-radius: 12px; outline: none;
+    }
+    input:focus { border-color: var(--accent); }
+    .row { display: flex; gap: 10px; margin-top: 20px; }
+    button {
+      flex: 1; padding: 13px; font-size: 1rem; font-weight: 600;
+      border: none; border-radius: 12px; cursor: pointer;
+      transition: transform 0.12s ease, filter 0.12s ease, opacity 0.2s ease;
+    }
+    button:active { transform: scale(0.97); filter: brightness(0.9); }
+    .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .primary[aria-busy="true"] { opacity: 0.8; pointer-events: none; }
+    .primary[aria-busy="true"]::before {
+      content: ""; width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid currentColor; border-right-color: transparent;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      button { transition: none; }
+      .primary[aria-busy="true"]::before { animation-duration: 2.4s; }
+    }
+    .primary { background: var(--accent); color: var(--on-accent); }
+    .ghost { flex: 0 0 auto; padding: 13px 16px; background: transparent; color: var(--danger); }
+    .hint { margin-top: 16px; font-size: 0.78rem; color: var(--text-dim); }
+    .status { margin: 0 0 8px; font-size: 0.85rem; color: var(--accent); display: none; }
+    .field { position: relative; }
+    .field input { padding-right: 64px; }
+    .reveal {
+      position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+      flex: none; padding: 6px 10px; font-size: 0.82rem; font-weight: 500;
+      background: transparent; color: var(--accent); border-radius: 8px;
+    }
+    .reveal:active { transform: translateY(-50%) scale(0.95); }
+    [hidden] { display: none !important; }
+    .notify { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--glass-border); }
+    .notify-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .notify-title { font-size: 0.95rem; font-weight: 600; }
+    .notify-hint { margin: 6px 0 0; font-size: 0.78rem; color: var(--text-dim); }
+    .switch {
+      flex: none; position: relative; width: 50px; height: 30px; padding: 0;
+      border-radius: 999px; background: var(--field); border: 1px solid var(--glass-border);
+    }
+    .switch span {
+      position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+      background: var(--text-dim); transition: transform 0.18s ease, background-color 0.18s ease;
+    }
+    .switch[aria-checked="true"] { background: var(--accent); border-color: transparent; }
+    .switch[aria-checked="true"] span { transform: translateX(20px); background: var(--on-accent); }
+    .notify-more { display: flex; gap: 8px; margin-top: 12px; }
+    .notify-test { margin-top: 8px; }
+    .notify-test .chip { width: 100%; }
+    .notify-test .notify-diag { margin-top: 8px; }
+    .notify-log { margin: 10px 0 0; padding: 10px; max-height: 50vh; overflow: auto; white-space: pre-wrap; word-break: break-all; font-size: 0.7rem; line-height: 1.5; color: var(--text-dim); border: 1px solid var(--glass-border); border-radius: 10px; }
+    .chip {
+      flex: 1; padding: 9px 10px; font-size: 0.85rem; font-weight: 500;
+      background: var(--field); color: var(--accent); border: 1px solid var(--glass-border);
+    }
+    @media (prefers-reduced-motion: reduce) { .switch span { transition: none; } }
+
+    /* Launch intro: the Orbit mark draws itself in on the launch colour the
+       system screen showed (white / black, as in the app's splash.xml), then
+       the intro fades into the page. The ring is a round-capped stroke
+       (r 80, width 32) trimmed from the gap clockwise; then the dot pops out
+       of the gap. Once per app start (sessionStorage), not on returning
+       from DSH; skipped for reduced motion. */
+    #intro {
+      position: fixed; inset: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      background: #ffffff; color: #111114;
+      animation: intro-out 0.3s ease 1.15s forwards;
+    }
+    #intro svg { width: 112px; height: 112px; overflow: visible; }
+    #intro .ring {
+      fill: none; stroke: currentColor; stroke-width: 32; stroke-linecap: round;
+      stroke-dasharray: 1 2; stroke-dashoffset: 1; opacity: 0;
+      animation: intro-ring 0.65s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+    }
+    #intro .dot {
+      fill: #5b7bff; transform-box: fill-box; transform-origin: center;
+      transform: translate(-14px, 14px) scale(0);
+      animation: intro-dot 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) 0.62s forwards;
+    }
+    @keyframes intro-ring {
+      0% { stroke-dashoffset: 1; opacity: 0; }
+      8% { opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 1; }
+    }
+    @keyframes intro-dot { to { transform: none; } }
+    @keyframes intro-out { to { opacity: 0; visibility: hidden; } }
+    @media (prefers-color-scheme: dark) {
+      #intro { background: #000000; color: #f2f2f4; }
+    }
+  </style>
+</head>
+<body>
+  <div id="intro" aria-hidden="true">
+    <svg viewBox="32 32 192 192">
+      <path class="ring" pathLength="1" d="M207.71 121.18A80 80 0 1 1 134.83 48.29" />
+      <circle class="dot" cx="184.57" cy="71.43" r="26" />
+    </svg>
+  </div>
+  <script>
+    // The intro plays once per app start; returning from DSH (Back) or
+    // reduced motion skips it. Removed after its fade so it never takes taps.
+    (function () {
+      var intro = document.getElementById("intro");
+      var seen = false;
+      try { seen = sessionStorage.getItem("dsh-bot.intro") === "1"; sessionStorage.setItem("dsh-bot.intro", "1"); } catch (e) {}
+      var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (seen || still) { intro.remove(); return; }
+      intro.addEventListener("animationend", function (e) { if (e.target === intro) intro.remove(); });
+    })();
+  </script>
+  <canvas id="neural" aria-hidden="true"></canvas>
+  <main class="card">
+    <h1>DSH Bot</h1>
+    <p class="sub">连接你的 DeepSeek Harness 服务</p>
+    <p class="status" id="status"></p>
+
+    <label for="link">服务地址</label>
+    <div class="field">
+      <input id="link" type="password" inputmode="url" placeholder="https://你的服务器/?token=…"
+             autocomplete="off" spellcheck="false" autocapitalize="off" />
+      <button class="reveal" id="reveal" type="button" aria-pressed="false">显示</button>
+    </div>
+
+    <div class="row">
+      <button class="ghost" id="forget" type="button" title="清除已保存配置">重置</button>
+      <button class="primary" id="go" type="button">登录</button>
+    </div>
+
+    <p class="hint">填你的 DSH 服务的完整地址；有 token 的话，直接粘贴带 ?token=… 的登录链接。地址只保存在本机，下次打开自动填好，点登录才会进入。服务重启后 token 会更换，在这里换成新链接即可。</p>
+
+    <section class="notify" id="notify" hidden>
+      <div class="notify-row">
+        <span class="notify-title" id="notify-label">消息通知</span>
+        <button class="switch" id="notify-toggle" type="button" role="switch" aria-checked="false" aria-labelledby="notify-label"><span></span></button>
+      </div>
+      <p class="notify-hint" id="notify-hint"></p>
+      <div class="notify-more" id="notify-more" hidden>
+        <button class="chip" id="notify-settings" type="button">通知样式</button>
+        <button class="chip" id="notify-battery" type="button">后台与自启动</button>
+      </div>
+      <div class="notify-test" id="notify-test-row" hidden>
+        <button class="chip" id="notify-test" type="button">发送测试通知</button>
+        <p class="notify-hint" id="notify-state"></p>
+        <button class="chip notify-diag" id="notify-diag" type="button">诊断记录</button>
+        <pre class="notify-log" id="notify-log" hidden></pre>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+      var KEY = "dsh-bot.config";
+      var $ = function (id) { return document.getElementById(id); };
+
+      /**
+       * The full address of a DSH web server, with or without ?token=…,
+       * normalized; null when it is not an http(s) address. "dsh.example.com"
+       * alone means https (a lone word without a scheme is refused). User info (user:pass@) is refused: it would hide
+       * the real host.
+       */
+      function parseUrl(raw) {
+        var text = (raw || "").trim();
+        if (!text) return null;
+        var bare = !/^[a-z][a-z0-9+.-]*:/i.test(text);
+        if (bare) text = "https://" + text;
+        var u;
+        try { u = new URL(text); } catch (_) { return null; }
+        if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+        if (!u.hostname || u.username || u.password) return null;
+        // Without a scheme, a lone word is more likely a typo than an
+        // intranet host; with http(s):// in front, "http://nas:3080" is fine.
+        if (bare && u.hostname.indexOf(".") === -1 && u.hostname !== "localhost") return null;
+        return u.href;
+      }
+
+      function load() {
+        var cfg = null;
+        try { cfg = JSON.parse(localStorage.getItem(KEY)); }
+        catch (_) { return null; }
+        if (!cfg) return null;
+        // Older builds saved the server address and the token apart.
+        var raw = cfg.url || (cfg.baseUrl && cfg.token ? cfg.baseUrl + "/?token=" + encodeURIComponent(cfg.token) : null);
+        var url = parseUrl(raw);
+        return url ? { url: url } : null;
+      }
+
+      function save(cfg) { localStorage.setItem(KEY, JSON.stringify(cfg)); }
+
+      /** 登录 shows a spinner and 登录中… until the remote page replaces this one. */
+      function setBusy(busy) {
+        $("go").disabled = busy;
+        $("go").textContent = busy ? "登录中…" : "登录";
+        $("go").setAttribute("aria-busy", busy ? "true" : "false");
+      }
+
+      function showStatus(text) {
+        $("status").style.display = "block";
+        $("status").textContent = text;
+      }
+
+      // Set right before leaving for the remote app, so a back-button
+      // return can say so. Purely informational: nothing auto-enters.
+      var LEFT = "dsh-bot.left";
+
+      /**
+       * Open the remote app through the native DshNav plugin
+       * (WebView.loadUrl). Never location.assign: that navigation is
+       * cross-site and loses the SameSite=Strict login cookie (T10).
+       */
+      function enter(cfg) {
+        var cap = window.Capacitor;
+        if (!cap || typeof cap.nativePromise !== "function") {
+          showStatus("当前环境不是 DSH Bot App，无法登录。");
+          return;
+        }
+        save(cfg);
+        try { sessionStorage.setItem(LEFT, "1"); } catch (_) { /* best effort */ }
+        setBusy(true);
+        showStatus("正在连接服务器…");
+        cap.nativePromise("DshNav", "open", { url: cfg.url }).catch(function () {
+          setBusy(false);
+          showStatus("打开失败：请检查服务地址是否正确。");
+        });
+      }
+
+      var returned = false;
+      try { returned = sessionStorage.getItem(LEFT) === "1"; } catch (_) { /* best effort */ }
+
+      // Prefill what was saved last time; the user still taps 登录.
+      var saved = load();
+      if (saved) {
+        $("link").value = saved.url;
+        if (returned) showStatus("已返回设置页。token 变了的话，换成新的链接再点登录。");
+      }
+
+      $("go").addEventListener("click", function () {
+        var url = parseUrl($("link").value);
+        if (!url) {
+          showStatus("请填写完整的服务地址，例如 https://dsh.example.com/?token=…");
+          return;
+        }
+        enter({ url: url });
+      });
+
+      // Back from the remote app may restore this page as it was left.
+      if (typeof window.addEventListener === "function") {
+        window.addEventListener("pageshow", function (e) {
+          setBusy(false);
+          if (e && e.persisted) showStatus("已返回设置页。token 变了的话，换成新的链接再点登录。");
+        });
+      }
+
+      $("reveal").addEventListener("click", function () {
+        var shown = $("link").type === "text";
+        $("link").type = shown ? "password" : "text";
+        $("reveal").textContent = shown ? "显示" : "隐藏";
+        $("reveal").setAttribute("aria-pressed", shown ? "false" : "true");
+      });
+
+      $("forget").addEventListener("click", function () {
+        localStorage.removeItem(KEY);
+        showStatus("已清除本机保存的配置。");
+        $("link").value = "";
+      });
+    })();
+  </script>
+  <script src="notify.js"></script>
+  <script src="backdrop.js"></script>
+</body>
+</html>

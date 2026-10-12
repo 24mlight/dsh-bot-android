@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed icon (Android 13+): the Orbit mark in one colour; the launcher tints it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.3"
+        android:scaleY="0.3"
+        android:translateX="15.6"
+        android:translateY="15.6">
+        <path android:fillColor="#FFFFFFFF" android:pathData="M223.65 119.81A96 96 0 1 1 136.19 32.35A16 16 0 0 1 133.46 64.23A64 64 0 1 0 191.77 122.54A16 16 0 0 1 223.65 119.81Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M158.57 71.43a26 26 0 1 0 52 0a26 26 0 1 0 -52 0Z" />
+    </group>
+</vector>

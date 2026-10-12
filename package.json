@@ -1,0 +1,21 @@
+{
+  "name": "dsh-bot-android",
+  "version": "0.1.22",
+  "private": true,
+  "description": "DSH Bot Android shell — a private Capacitor WebView client for the self-hosted DeepSeek Harness + DS Bot deployment.",
+  "main": "index.js",
+  "scripts": {
+    "cap": "cap",
+    "sync": "cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3"
+  },
+  "author": "24mlight",
+  "license": "MIT",
+  "type": "module"
+}
