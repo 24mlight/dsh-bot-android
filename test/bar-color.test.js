@@ -96,3 +96,61 @@ test("still works where elementFromPoint finds nothing", () => {
   };
   assert.equal(vm.runInNewContext(script, ctx), "#010203");
 });
+
+/** One page, polled several times: the context (and the script's cache)
+ * persists between runs, like the real page between polls. */
+function page() {
+  const colors = { body: "rgb(255, 255, 255)" };
+  const bodyEl = { n: "body", attrs: {}, getAttribute(k) { return k in this.attrs ? this.attrs[k] : null; } };
+  const idle = [];
+  let measured = 0;
+  let clock = 1000;
+  const ctx = vm.createContext({
+    document: { body: bodyEl, documentElement: { n: "html" }, elementFromPoint: () => null },
+    window: {
+      innerWidth: 400,
+      getComputedStyle: (el, pseudo) => { measured++; return { backgroundColor: colors[el.n + (pseudo || "")] }; },
+      requestIdleCallback: (fn) => idle.push(fn),
+    },
+    location: { href: "https://dsh.example/chat/1" },
+  });
+  vm.runInContext("Date.now = () => globalThis.__clock", ctx);
+  const poll = () => { ctx.__clock = clock; return vm.runInContext(script, ctx); };
+  return {
+    poll, colors, bodyEl, ctx, idle,
+    measured: () => measured,
+    advance(ms) { clock += ms; },
+    runIdle() { ctx.__clock = clock; while (idle.length) idle.shift()(); },
+  };
+}
+
+test("between theme changes a poll reads nothing from the page", () => {
+  const p = page();
+  assert.equal(p.poll(), "#ffffff");
+  const after = p.measured();
+  p.colors.body = "rgb(1, 2, 3)";
+  p.advance(500);
+  assert.equal(p.poll(), "#ffffff", "the last colour, no measuring");
+  assert.equal(p.measured(), after, "no style or layout read mid-animation");
+});
+
+test("DSH's dark switch is picked up on the next poll", () => {
+  const p = page();
+  p.poll();
+  p.colors.body = "rgb(15, 18, 32)";
+  p.bodyEl.attrs["data-ds-dark-theme"] = "";
+  assert.equal(p.poll(), "#0f1220");
+});
+
+test("a change with no theme signal (the boot screen going) is measured in idle time", () => {
+  const p = page();
+  p.poll();
+  p.colors.body = "rgb(18, 18, 18)";
+  p.advance(1000);
+  assert.equal(p.poll(), "#ffffff", "still the old colour this poll");
+  assert.equal(p.idle.length, 1, "a measurement waits for idle time");
+  p.poll();
+  assert.equal(p.idle.length, 1, "only one at a time");
+  p.runIdle();
+  assert.equal(p.poll(), "#121212", "the next poll has it");
+});

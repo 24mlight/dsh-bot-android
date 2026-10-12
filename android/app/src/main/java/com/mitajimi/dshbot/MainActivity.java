@@ -6,7 +6,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Display;
 import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.splashscreen.SplashScreen;
@@ -72,12 +74,17 @@ public class MainActivity extends BridgeActivity {
         if (webView != null) {
             webView.setForceDarkAllowed(false);
             if (Build.VERSION.SDK_INT >= 33) webView.getSettings().setAlgorithmicDarkeningAllowed(false);
+            // The WebView is the whole app: let it draw the parts just off
+            // screen ahead of time, so a quick fling does not show blank tiles.
+            webView.getSettings().setOffscreenPreRaster(true);
         }
+        preferFastestRefresh();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        preferFastestRefresh();
         Notices.clearMessages(this);
         // Notifications on: make sure the notice service runs (it may have been
         // stopped while the app was closed) and polls now, not after a pause.
@@ -118,6 +125,38 @@ public class MainActivity extends BridgeActivity {
             bars.setAppearanceLightStatusBars(light);
             bars.setAppearanceLightNavigationBars(light);
         });
+    }
+
+    /**
+     * Ask for the screen's fastest refresh rate at its current resolution.
+     * Many phones run an app (and its WebView) at 60Hz unless the window asks
+     * for more, so on a 120Hz screen scrolling and animations showed half the
+     * frames they could.
+     */
+    @SuppressWarnings("deprecation")
+    private void preferFastestRefresh() {
+        Display display = Build.VERSION.SDK_INT >= 30 ? getDisplay() : getWindowManager().getDefaultDisplay();
+        if (display == null) return;
+        Display.Mode current = display.getMode();
+        Display.Mode[] modes = display.getSupportedModes();
+        if (current == null || modes == null) return;
+        int n = modes.length;
+        int[] ids = new int[n];
+        int[] widths = new int[n];
+        int[] heights = new int[n];
+        float[] rates = new float[n];
+        for (int i = 0; i < n; i++) {
+            ids[i] = modes[i].getModeId();
+            widths[i] = modes[i].getPhysicalWidth();
+            heights[i] = modes[i].getPhysicalHeight();
+            rates[i] = modes[i].getRefreshRate();
+        }
+        int want = DisplayModes.fastest(current.getModeId(), ids, widths, heights, rates);
+        Window window = getWindow();
+        WindowManager.LayoutParams params = window.getAttributes();
+        if (params.preferredDisplayModeId == want) return;
+        params.preferredDisplayModeId = want;
+        window.setAttributes(params);
     }
 
     private void goBackOrDefault(WebView webView) {
