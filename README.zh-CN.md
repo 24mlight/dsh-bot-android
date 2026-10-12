@@ -1,6 +1,18 @@
-# DSH Bot 安卓客户端
+<p align="center">
+  <img src="docs/icon/app-icon.svg" width="112" height="112" alt="DSH Bot icon">
+</p>
 
-[English](README.md) · **简体中文**
+<h1 align="center">DSH Bot 安卓客户端</h1>
+
+<p align="center">
+  <a href="https://github.com/24mlight/dsh-bot-android/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/24mlight/dsh-bot-android?label=release&color=5b7bff"></a>
+  <a href="https://github.com/24mlight/dsh-bot-android/actions/workflows/android.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/24mlight/dsh-bot-android/android.yml?branch=main&label=build"></a>
+  <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white">
+  <img alt="Capacitor 8" src="https://img.shields.io/badge/Capacitor-8-119EFF?logo=capacitor&logoColor=white">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/24mlight/dsh-bot-android?color=blue"></a>
+</p>
+
+<p align="center"><a href="README.md">English</a> · <b>简体中文</b></p>
 
 给你自己部署的 [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh)（DSH）用的安卓 App。
 - **全屏打开：** 全屏打开你的 DSH 网页界面，配合 Liquid Glass（液态玻璃）皮肤，适配手机屏幕和深浅色模式。

@@ -1,6 +1,18 @@
-# DSH Bot for Android
+<p align="center">
+  <img src="docs/icon/app-icon.svg" width="112" height="112" alt="DSH Bot icon">
+</p>
 
-**English** · [简体中文](README.zh-CN.md)
+<h1 align="center">DSH Bot for Android</h1>
+
+<p align="center">
+  <a href="https://github.com/24mlight/dsh-bot-android/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/24mlight/dsh-bot-android?label=release&color=5b7bff"></a>
+  <a href="https://github.com/24mlight/dsh-bot-android/actions/workflows/android.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/24mlight/dsh-bot-android/android.yml?branch=main&label=build"></a>
+  <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white">
+  <img alt="Capacitor 8" src="https://img.shields.io/badge/Capacitor-8-119EFF?logo=capacitor&logoColor=white">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/24mlight/dsh-bot-android?color=blue"></a>
+</p>
+
+<p align="center"><b>English</b> · <a href="README.zh-CN.md">简体中文</a></p>
 
 An Android app for your own [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh) (DSH) server. It opens your DSH web UI full screen, styled by the Liquid Glass skin and fitted to a phone screen in light and dark mode. It also shows a notification, as a banner and on the lock screen, when a reply is ready or a question is waiting for you, even while the app is closed.
 
