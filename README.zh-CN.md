@@ -2,9 +2,9 @@
 
 [English](README.md) · **简体中文**
 
-给你自己部署的 [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh)（DSH）用的安卓 App，装不装 [ds-bot](https://www.npmjs.com/package/ds-bot) 多 Bot 插件都能用。
-- **全屏打开：** 全屏打开你的 DSH 网页界面，配合 Liquid Glass（液态玻璃）皮肤。
-- **消息通知：** Bot、群聊或 DSH Agent 回复时，用横幅和锁屏通知提醒你，App 关着也能收到。
+给你自己部署的 [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh)（DSH）用的安卓 App。
+- **全屏打开：** 全屏打开你的 DSH 网页界面，配合 Liquid Glass（液态玻璃）皮肤，适配手机屏幕和深浅色模式。
+- **消息通知：** 对话回复完成、或者需要你回答问题时，用横幅和锁屏通知提醒你，App 关着也能收到。
 
 App 不绑定任何服务器：第一次填一次你的服务地址，之后就连那一台。
 
@@ -148,6 +148,13 @@ docs/icon/              App 图标源文件（Orbit：圆环里跳出一个点�
 - `ANDROID_KEY_PASSWORD`。
 
 运行 **Android APK** 工作流并填写 `release_tag`（例如 `v0.1.19`），就会发布一个 Release。Fork 需要用自己的 keystore，所以它打出来的 APK 不能覆盖安装这里的版本。
+
+## 推荐搭配
+
+- **[dsh-liquid-glass](https://github.com/24mlight/dsh-liquid-glass)：** 苹果风格的液态玻璃皮肤，电脑浏览器里用 DSH 也很好看。
+- **[ds-bot](https://www.npmjs.com/package/ds-bot)：** 多 Bot 插件，可以在 DSH 里建多个 Bot 和群聊。装上后 App 里也能用，Bot 的回复和群聊消息都会推送通知。
+
+安装命令都在上面的[服务器插件](#服务器插件)里。
 
 ## 许可证
 

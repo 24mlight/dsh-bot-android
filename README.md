@@ -2,7 +2,7 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
-An Android app for your own [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh) (DSH) server, with or without the [ds-bot](https://www.npmjs.com/package/ds-bot) multi-bot plugin. It opens your DSH web UI full screen, styled by the Liquid Glass skin. It also shows a notification, as a banner and on the lock screen, when a Bot, a group or a DSH Agent replies, even while the app is closed.
+An Android app for your own [DeepSeek Harness](https://www.npmjs.com/package/@deepseek-ai/dsh) (DSH) server. It opens your DSH web UI full screen, styled by the Liquid Glass skin and fitted to a phone screen in light and dark mode. It also shows a notification, as a banner and on the lock screen, when a reply is ready or a question is waiting for you, even while the app is closed.
 
 The app is not tied to any server: you paste your server's address once, and that server is the one it opens.
 
@@ -128,6 +128,13 @@ docs/icon/              app icon sources (Orbit: a ring with a dot stepping out)
 ```
 
 Release builds are signed in CI from four repository secrets: `ANDROID_KEYSTORE_BASE64` (the PKCS12 keystore, base64), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`. Run the **Android APK** workflow with a `release_tag` (e.g. `v0.1.19`) to publish a release. A fork must use its own keystore, so its APKs cannot install over these.
+
+## Recommended
+
+- **[dsh-liquid-glass](https://github.com/24mlight/dsh-liquid-glass):** the Apple-style Liquid Glass skin, which also looks good in a desktop browser.
+- **[ds-bot](https://www.npmjs.com/package/ds-bot):** a multi-bot plugin for DSH, with several Bots and group chats. It works in the app too, and Bot replies and group messages come as notifications.
+
+Their install commands are under [Server plugins](#server-plugins) above.
 
 ## License
 
